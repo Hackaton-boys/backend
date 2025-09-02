@@ -71,6 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+AUTH_USER_MODEL = 'gestao_ecobags.Usuario'  # Define o modelo de usuário personalizado
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

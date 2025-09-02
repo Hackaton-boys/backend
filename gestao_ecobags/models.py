@@ -1,12 +1,39 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
-class Usuario(models.Model):
+class UsuarioManager(BaseUserManager):
+    def create_user(self, email, nome, telefone=None, password=None, **extra_fields):
+        if not email:
+            raise ValueError("O usuário precisa de um email")
+        email = self.normalize_email(email)
+        user = self.model(email=email, nome=nome, telefone=telefone, **extra_fields)
+        user.set_password(password)  # criptografa a senha
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, nome, telefone=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(email, nome, telefone, password, **extra_fields)
+
+
+class Usuario(AbstractBaseUser, PermissionsMixin):
     id_usuario = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=45)
     email = models.EmailField(unique=True)
-    telefone = models.CharField(max_length=15)
-    is_admin = models.BooleanField(default=False)
+    telefone = models.CharField(max_length=15, blank=True, null=True)
+
+    # Flags do Django
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)   # acesso ao Django Admin
+    is_superuser = models.BooleanField(default=False)  # superusuário
+
+    USERNAME_FIELD = "email"          # login será feito com email
+    REQUIRED_FIELDS = ["nome"]        # campos obrigatórios ao criar superuser
+
+    objects = UsuarioManager()
 
     def __str__(self):
         return self.nome
