@@ -35,8 +35,12 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     objects = UsuarioManager()
 
+    def id(self):
+        return f'{self.id_usuario}, {self.nome}'
+    
     def __str__(self):
         return self.nome
+
     
 class Comentario(models.Model):
     id_comentario = models.AutoField(primary_key=True)
@@ -111,3 +115,4 @@ class Movimentacao(models.Model):
 
     def __str__(self):
         return f"{self.get_tipo_display()} de {self.quantidade} por {self.fk_usuario.nome} em {self.data_hora}"
+
