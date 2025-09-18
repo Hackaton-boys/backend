@@ -10,8 +10,9 @@ authors = [
 dependencies = [
     "django>=4.2.24",
     "djangorestframework>=3.16.1",
-    "django-cors-headers>=4.7.0",
+    "django-cors-headers>=4.8.0",
     "djangorestframework-simplejwt>=5.5.1",
+    "djoser>=2.3.3",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

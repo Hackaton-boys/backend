@@ -4,24 +4,24 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 class UsuarioManager(BaseUserManager):
-    def create_user(self, email, nome, telefone=None, password=None, **extra_fields):
+    def create_user(self, email, username, telefone=None, password=None, **extra_fields):
         if not email:
             raise ValueError("O usuário precisa de um email")
         email = self.normalize_email(email)
-        user = self.model(email=email, nome=nome, telefone=telefone, **extra_fields)
+        user = self.model(email=email, username=username, telefone=telefone, **extra_fields)
         user.set_password(password)  # criptografa a senha
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, nome, telefone=None, password=None, **extra_fields):
+    def create_superuser(self, email, username, telefone=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        return self.create_user(email, nome, telefone, password, **extra_fields)
+        return self.create_user(email, username, telefone, password, **extra_fields)
 
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     id_usuario = models.AutoField(primary_key=True)
-    nome = models.CharField(max_length=45)
+    username= models.CharField(max_length=45)
     email = models.EmailField(unique=True)
     telefone = models.CharField(max_length=15, blank=True, null=True)
 
@@ -31,15 +31,15 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)  # superusuário
 
     USERNAME_FIELD = "email"          # login será feito com email
-    REQUIRED_FIELDS = ["nome"]        # campos obrigatórios ao criar superuser
+    REQUIRED_FIELDS = ["username"]        # campos obrigatórios ao criar superuser
 
     objects = UsuarioManager()
 
     def id(self):
-        return f'{self.id_usuario}, {self.nome}'
+        return f'{self.id_usuario}, {self.username}'
     
     def __str__(self):
-        return self.nome
+        return self.username
 
     
 class Comentario(models.Model):
@@ -53,7 +53,7 @@ class Comentario(models.Model):
     data_hora = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.fk_usuario.nome} comentou: {self.comentario[:30]}..."
+        return f"{self.fk_usuario.username} comentou: {self.comentario[:30]}..."
     
 class Estado(models.Model):
     id_estado = models.AutoField(primary_key=True)
@@ -83,11 +83,6 @@ class Ponto(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     endereco = models.CharField(max_length=255)
     estoque = models.IntegerField()
-    fk_usuario = models.ForeignKey(
-        'Usuario',
-        on_delete=models.CASCADE,
-        db_column='fk_usuario'
-    )
     fk_cidade = models.ForeignKey(
         'Cidade',
         on_delete=models.CASCADE,
@@ -107,6 +102,7 @@ class Movimentacao(models.Model):
     tipo = models.PositiveSmallIntegerField(choices=Tipo_Choices)
     quantidade = models.IntegerField()
     data_hora = models.DateTimeField(auto_now_add=True)
+    realizado = models.BooleanField(default=False)
     fk_usuario = models.ForeignKey(
         'Usuario',
         on_delete=models.CASCADE,
